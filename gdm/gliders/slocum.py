@@ -184,9 +184,12 @@ def load_dba_to_df(dba_file, keep_gld_dups=False):
                        # error_bad_lines=False,
                        # warn_bad_lines=True,
                        header=None,
-                       parse_dates=timestamps,
-                       date_parser=epoch2datetime,
+                       # parse_dates=timestamps,
+                       # date_parser=epoch2datetime,
                        skiprows=num_header_lines)
+    
+    # Convert timestamps to datetime - must be after read_table since pandas 2.0
+    df[timestamps] = df[timestamps].apply(epoch2datetime)
 
     if not keep_gld_dups:
         dup_sensors = [s['native_sensor_name'] for s in dba_sensor_defs if
