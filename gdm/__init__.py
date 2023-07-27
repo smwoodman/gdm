@@ -239,7 +239,7 @@ class GliderDataModel(object):
         """
 
         for profile_time, row in self._profiles_meta.iterrows():
-            yield profile_time, self.slice_profile_dataset(profile_time, drop_missing=drop_missing)
+            yield profile_time, row, self.slice_profile_dataset(profile_time, drop_missing=drop_missing)
 
     def _set_global_attributes(self):
         """
