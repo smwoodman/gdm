@@ -123,11 +123,13 @@ def load_dba(dba_file, keep_gld_dups=False):
     if 'm_gps_lat' in df.columns:
         # Replace bad fixes with NaN
         df['latitude'] = dm2dd(df.m_gps_lat)
-        df.latitude.where((df.latitude < 90) & (df.latitude > -90), inplace=True)
+        # df.latitude.where((df.latitude < 90) & (df.latitude > -90), inplace=True)
+        df['latitude'] = df.latitude.where((df.latitude < 90) & (df.latitude > -90))
         df['ilatitude'] = df.latitude.interpolate()
     if 'm_gps_lon' in df.columns:
         df['longitude'] = dm2dd(df.m_gps_lon)
-        df.longitude.where((df.longitude < 180) & (df.longitude > -180), inplace=True)
+        # df.longitude.where((df.longitude < 180) & (df.longitude > -180), inplace=True)
+        df['longitude'] = df.longitude.where((df.longitude < 180) & (df.longitude > -180))
         df['ilongitude'] = df.longitude.interpolate()
 
     # Process pressure sensors
@@ -138,7 +140,8 @@ def load_dba(dba_file, keep_gld_dups=False):
         if pressure_sensor not in df.columns:
             continue
 
-        df[pressure_sensor].where(df[pressure_sensor] > 0, inplace=True)
+        # df[pressure_sensor].where(df[pressure_sensor] > 0, inplace=True)
+        df[pressure_sensor] = df[pressure_sensor].where(df[pressure_sensor] > 0)
         df[pressure_sensor] = df[pressure_sensor] * 10.
 
     # Index profiles and build the profiles metadata DataFrame
@@ -351,9 +354,9 @@ def build_profiles(df, z_sensor='sci_water_pressure'):
         # Add the profile_dir
         profile = df[z_sensor].loc[pt0:pt1].dropna()
         profile_dir = ''
-        if profile[0] - profile[-1] < 0:
+        if profile.iloc[0] - profile.iloc[-1] < 0:
             profile_dir = 'd'
-        elif profile[0] - profile[-1] > 0:
+        elif profile.iloc[0] - profile.iloc[-1] > 0:
             profile_dir = 'u'
 
         profile_info = [pt_mean,
@@ -362,10 +365,10 @@ def build_profiles(df, z_sensor='sci_water_pressure'):
                         profile_dir,
                         pt0,
                         pt1,
-                        profile[0],
-                        profile[-1],
+                        profile.iloc[0],
+                        profile.iloc[-1],
                         df.segment.unique()[0],
-                        math.fabs(profile[0] - profile[-1]) / pt_delta.total_seconds(),
+                        math.fabs(profile.iloc[0] - profile.iloc[-1]) / pt_delta.total_seconds(),
                         (len(profile) / pt_delta.total_seconds()) ** -1]
         profiles.append(profile_info)
 
